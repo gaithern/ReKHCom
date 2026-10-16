@@ -1549,7 +1549,9 @@ static void ComposeLine(int y, uint16_t dispcnt, const int* bgOn, const int* bgP
         int obj = objects && (mask & WIN_OBJ) && sObjLine[x] != TRANSPARENT;
         int objFront, blend;
 
-        if (gx < sLeft || gx >= sRight || (sSpotlight && (sScreenBgMask & 2u))) {
+        if (gx < sLeft || gx >= sRight ||
+            (sSpotlight && (gx < 0 || gx >= GBA_SCREEN_W || y < gPortScreen.originY ||
+                           y >= gPortScreen.originY + GBA_SCREEN_H))) {
             dst[x] = 0xFF000000u;
             continue;
         }
@@ -2104,7 +2106,7 @@ void PortPpuBeginFrame(void) {
         int arena = (m == 2 || (m == 1 && b == 2)) && b >= 2 && (IO16(0x08 + b * 2) >> 14) >= 2;
         /* Split menus may use the engine's map-block API too; those blocks
            describe UI pages, not a world that should remain under the overlay. */
-        sScreenBg[b] = sOverlay && !(sSpotlight && b == 0 && !(sScreenBgMask & 2u)) &&
+        sScreenBg[b] = sOverlay && !(sSpotlight && b == 0) &&
             ((sScreenBgMask & (1u << b)) || sBgSplit[b] ||
              (!sBgLatch[b].valid && !sBgWorldLatched[b].valid && !arena));
     }
